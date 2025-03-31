@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { NATS_CLIENT } from 'src/configs/nats-client.configs';
@@ -32,6 +41,15 @@ export class AuthController {
   @Get('get-user')
   getUser() {
     return this.client.send('get.user.or.admin', {}).pipe(
+      catchError((err) => {
+        throw new RpcException(err as string);
+      }),
+    );
+  }
+
+  @Get('getby-id/:id')
+  getById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.client.send('getbyid.user.or.admin', { id }).pipe(
       catchError((err) => {
         throw new RpcException(err as string);
       }),
